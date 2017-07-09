@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        body {
+            margin: 0px;
+            background-color: #000000;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<canvas id="render_canvas"></canvas>
+
+<script src = "../bin/bundle.min.js" type="text/javascript"></script>
+
+<script>
+
+    var W = window.innerWidth,H = window.innerHeight;
+
+    var canvas = document.querySelector("#render_canvas");
+    canvas.width = W;
+    canvas.height = H;
+
+    var gl = canvas.getContext("webgl2",{
+        alpha:false,
+        depth:true,
+        stencil:true,
+        antialias:true,
+        premultipliedAlpha:true,
+        preserveDrawingBuffer:false
+    });
+
+    Demo.Triangle.gl = gl;
+
+    init();
+
+    animate();
+
+    function init(){
+
+        Demo.Triangle.init(W,H);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        Demo.Triangle.render();
+
+    }
+
+
+
+</script>
+
+</body>
+</html>
