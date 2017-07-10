@@ -34,22 +34,20 @@
         preserveDrawingBuffer:false
     });
 
-    Demo.Triangle.gl = gl;
+    Demo.Shadow.gl = gl;
 
     init();
 
     animate();
 
     function init(){
-
-        Demo.Triangle.init(H,H);
+        Demo.Shadow.init(W,H);
     }
 
     function animate() {
         requestAnimationFrame(animate);
 
-        Demo.Triangle.render();
-
+        Demo.Shadow.render();
     }
 
 

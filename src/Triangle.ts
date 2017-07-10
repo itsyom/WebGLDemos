@@ -2,12 +2,10 @@
  * Created by hey on 2017/7/9.
  */
 
-
 namespace Demo.Triangle{
 
     // import any = Demo.any;
     // import Shader = Demo.Shader;
-
 
     export let gl:WebGLRenderingContext = null;
 
