@@ -638,21 +638,17 @@ namespace Demo {
             }
 
             dest[0] = x0;
-            dest[1] = y0;
-            dest[2] = z0;
+            dest[1] = x1;
+            dest[2] = x2;
             dest[3] = 0;
-            dest[4] = x1;
+            dest[4] = y0;
             dest[5] = y1;
-            dest[6] = z1;
+            dest[6] = y2;
             dest[7] = 0;
-            dest[8] = x2;
-            dest[9] = y2;
+            dest[8] = z0;
+            dest[9] = z1;
             dest[10] = z2;
             dest[11] = 0;
-
-            // dest[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
-            // dest[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
-            // dest[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
 
             dest[12] = eyex;
             dest[13] = eyey;
