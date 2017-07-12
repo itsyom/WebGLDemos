@@ -108,7 +108,7 @@ namespace Demo.Shadow{
            vec3 lighting = (0.15+(1.-shadow)*0.6)*diffuseColor;
            color = vec4(vec3(lighting),1.);
            
-           color = vec4(vec3(shadow),1.);
+           // color = vec4(vec3(shadow),1.);
         }
     `;
 
@@ -234,7 +234,7 @@ namespace Demo.Shadow{
             projectionScene = mat4.perspective(45,width/height,0.1,100,projectionScene);
             viewScene = mat4.create();
 
-            viewScene = mat4.lookAt([2,4,1],[0,0,0],[0,1,0],viewScene);
+            viewScene = mat4.lookAt([2,4,5],[0,0,0],[0,1,0],viewScene);
             viewScene = mat4.inverse(viewScene,viewScene);
 
             gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"projection"),false,projectionScene);
