@@ -5,6 +5,32 @@
 
 namespace Demo.Shadow{
 
+    let vertex_debugShader = `#version 300 es
+        layout(location = 0) in vec2 position;
+        
+        out vec2 uv;
+        void main(){
+            gl_Position = vec4(position,0,1);
+            
+            uv = position*0.5+0.5;
+        }
+    `;
+
+    let fragment_debugShader = `#version 300 es
+        precision highp float;
+        uniform sampler2D depthTexture;
+        
+        in vec2 uv;
+        
+        out vec4 color;
+        void main(){
+            
+            float depthValue = texture(depthTexture, uv).r;
+            // depthValue = 0.5;
+            color = vec4(vec3(depthValue), 1.0);
+        }
+    `;
+
     let vertex_simpleDepthShader = `#version 300 es
         
         layout(location = 0) in vec3 position;   
@@ -25,7 +51,7 @@ namespace Demo.Shadow{
         
         out vec4 color;
         void main(){
-            color = vec4(vec3(diffuseColor),1.);
+            color = vec4(vec3(gl_FragCoord.z),1.);
         }
     `;
 
@@ -53,7 +79,7 @@ namespace Demo.Shadow{
         
         uniform vec3 diffuseColor;
         
-        uniform sampler2D depthMap;
+        uniform sampler2D depthTexture;
         
         in vec4 fragPosLightSpace;
         
@@ -61,48 +87,33 @@ namespace Demo.Shadow{
             vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
             projCoords = projCoords*0.5+0.5;
             
-            float closestDepth = texture(depthMap,projCoords.xy).r;
+            float closestDepth = texture(depthTexture,projCoords.xy).r;
+            // closestDepth = 0.;
             float currentDepth = projCoords.z;
             
-            float shadow = currentDepth > closestDepth? 1.0:0.;
+            float shadow = (currentDepth >= closestDepth ? 1.0:0.);
+            
+            // shadow = projCoords.z;
+            // shadow = closestDepth;
+            
             return shadow;
         }
         
         void main(){
             float shadow = shadowCalculation(fragPosLightSpace);
-            color = vec4(diffuseColor*(1.-shadow),1.);
+             // shadow = 1.;
+            // color = vec4(diffuseColor*(1.-shadow),1.);
+           // color = vec4(vec3(shadow),1.);
+           
+           vec3 lighting = (0.15+(1.-shadow)*0.6)*diffuseColor;
+           color = vec4(vec3(lighting),1.);
+           
            color = vec4(vec3(shadow),1.);
         }
     `;
 
 
-    let vertex_debugShader = `#version 300 es
-        layout(location = 0) in vec2 position;
-        
-        
-        out vec2 uv;
-        void main(){
-            gl_Position = vec4(position,0,1);
-            
-            uv = position*0.5+0.5;
-        }
-        
-    `;
 
-    let fragment_debugShader = `#version 300 es
-        precision highp float;
-        uniform sampler2D depthTexture;
-        
-        in vec2 uv;
-        
-        out vec4 color;
-        void main(){
-            
-            float depthValue = texture(depthTexture, uv).r;
-            // depthValue = 0.5;
-            color = vec4(vec3(depthValue), 1.0);
-        }
-    `;
 
     let verticesQuad = new Float32Array([
 
@@ -140,11 +151,15 @@ namespace Demo.Shadow{
     function initFrameBuffer(){
         textureDepth = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D,textureDepth);
-        gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT16,width,height,0,gl.DEPTH_COMPONENT,gl.UNSIGNED_SHORT,null);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT16,width_shadow,height_shadow,0,gl.DEPTH_COMPONENT,gl.UNSIGNED_SHORT,null);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+
+        // let depthBuffer = gl.createRenderbuffer();
+        // gl.bindRenderbuffer(gl.RENDERBUFFER,depthBuffer);
+        // gl.renderbufferStorage()
 
         framebuffer = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);
@@ -161,7 +176,7 @@ namespace Demo.Shadow{
         programShadow = shader.program;
 
         let projection = mat4.ortho(-10,10,-10,10,1,7.5,[]);
-        let view = mat4.lookAt([-2,4,-1],[0,0,0],[0,1,0],[1,1,1]);
+        let view = mat4.lookAt([-2,4,-1],[0,0,0],[0,1,0],[]);
 
         let viewInverse = mat4.inverse(view,[]);
 
@@ -178,15 +193,11 @@ namespace Demo.Shadow{
         programDebug = shader.program;
     }
 
-
-
-
     let projectionScene:number[] = [];
     let viewScene:number[] = [];
 
     export function render(){
         gl.viewport(0,0,width_shadow,height_shadow);
-        // gl.viewport(0,0,width,height);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
 
@@ -198,50 +209,77 @@ namespace Demo.Shadow{
         renderScene(programShadow);
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
 
-        //render texture to quad
-        // gl.useProgram(programDebug);
-        // gl.activeTexture(gl.TEXTURE0);
-        // gl.bindTexture(gl.TEXTURE_2D,textureDepth);
-        //
-        // gl.uniform1i(gl.getUniformLocation(programDebug,"depthTexture"),0);
-        //
-        // gl.viewport(0,0,width,height);
-        // renderQuad();
+        let debug = false;
 
-        gl.useProgram(programScene);
-        projectionScene = mat4.perspective(45,width/height,1,1000,projectionScene);
-        viewScene = mat4.create();
+        if(debug){
+            //render texture to quad
+            gl.useProgram(programDebug);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D,textureDepth);
 
-        viewScene = mat4.lookAt([0,3,20],[0,0,0],[0,1,0],viewScene);
-        viewScene = mat4.inverse(viewScene,viewScene);
+            gl.uniform1i(gl.getUniformLocation(programDebug,"depthTexture"),0);
 
-        gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"projection"),false,projectionScene);
-        gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"view"),false,viewScene);
+            gl.viewport(0,0,width,height);
+            renderQuad();
+        }
 
-        let modelFloor = mat4.create();
-        gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"model"),false,modelFloor);
+        if(!debug){
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
 
-        gl.viewport(0,0,width,height);
-        gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"lightSpaceMatrix"),false,lightSpaceMatrix);
+            gl.viewport(0, 0, width, height);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D,textureDepth);
-        gl.uniform1i(gl.getUniformLocation(programScene,"depthMap"),0);
+            gl.useProgram(programScene);
+            projectionScene = mat4.perspective(45,width/height,0.1,100,projectionScene);
+            viewScene = mat4.create();
 
-        renderScene(programScene);
+            viewScene = mat4.lookAt([2,4,1],[0,0,0],[0,1,0],viewScene);
+            viewScene = mat4.inverse(viewScene,viewScene);
+
+            gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"projection"),false,projectionScene);
+            gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"view"),false,viewScene);
+
+            gl.uniformMatrix4fv(gl.getUniformLocation(programScene,"lightSpaceMatrix"),false,lightSpaceMatrix);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D,textureDepth);
+            gl.uniform1i(gl.getUniformLocation(programScene,"depthTexture"),0);
+
+            renderScene(programScene);
+
+        }
+
     }
 
     function renderScene(program:WebGLProgram){
         let model = mat4.create();
         gl.uniformMatrix4fv(gl.getUniformLocation(program,"model"),false,model);
-        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[0.5,0.5,0.5]);
+        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[1.,1.,0.1]);
 
         renderFloor(program);
 
-        mat4.setCol(model,3,[0,1,0,1]);
+        model = mat4.create();
+        mat4.setCol(model,3,[0,1.,0,1]);
+        model = mat4.scale(model, [0.5,0.5,0.5],model);
         gl.uniformMatrix4fv(gl.getUniformLocation(program,"model"),false,model);
-        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[1.,0.5,0.5]);
+        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[1.,0,0.]);
         renderCube(program);
+
+        model = mat4.create();
+        mat4.setCol(model,3,[2,0,1,1]);
+        model = mat4.scale(model, [0.5,0.5,0.5],model);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program,"model"),false,model);
+        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[0.,1.,0.]);
+        renderCube(program);
+
+        let model3 = mat4.create();
+        mat4.setCol(model3,3,[-1,0,2,1]);
+        model3 = mat4.scale(model3, [0.25,0.25,0.25],model3);
+        gl.uniformMatrix4fv(gl.getUniformLocation(program,"model"),false,model3);
+        gl.uniform3fv(gl.getUniformLocation(program,"diffuseColor"),[.0,0.,1.]);
+        renderCube(program);
+
     }
 
     let vertices_cube = new Float32Array([
@@ -311,13 +349,6 @@ namespace Demo.Shadow{
 
     function renderCube(program:WebGLProgram){
         initCubeVao();
-
-        let model:number[] = mat4.create();
-        // mat4.scale(model,[3,3,3],model);
-        mat4.setCol(model,3,[0,1,0,1]);
-
-        gl.uniformMatrix4fv(gl.getUniformLocation(program,"model"),false,model);
-        gl.uniform3fv(gl.getUniformLocation(program,"diffuse"),[1,0,0]);
 
         any(gl).bindVertexArray(vaoCube);
         gl.drawArrays(gl.TRIANGLES,0,36);
