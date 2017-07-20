@@ -23,9 +23,10 @@ namespace Demo.UBO{
         
         out vec4 color;
         void main(){
-            color = vec4(vec3(red*a[0],0.,0.),1.);
+            color = vec4(vec3(red*a[0],1.,0.),1.);
         }
     `;
+
 
     let vertices = new Float32Array([
         -1,-1,

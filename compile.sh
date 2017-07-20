@@ -1,0 +1,1 @@
+cd /Users/huchunfeng/GitHub/WebGLDemos && tsc

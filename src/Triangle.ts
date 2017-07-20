@@ -4,7 +4,6 @@
 
 namespace Demo.Triangle{
 
-    // import any = Demo.any;
     // import Shader = Demo.Shader;
 
     export let gl:WebGLRenderingContext = null;
@@ -24,7 +23,6 @@ namespace Demo.Triangle{
         0.,1,0,
         0,0,1
     ]);
-
 
     let indices = new Uint16Array([
        0,1,2
@@ -90,7 +88,6 @@ namespace Demo.Triangle{
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
 
     }
-
 
 
     function initProgram(){
