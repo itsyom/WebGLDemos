@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body>
+
+<canvas id="render_canvas"></canvas>
+<script type="text/javascript" src = "../bin/bundle.min.js"></script>
+<script>
+    var canvas = document.getElementById("render_canvas") ;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var gl = canvas.getContext("webgl2",{
+            atalias:false
+        }) ;
+
+    Demo.UBO.gl = gl;
+
+    Demo.UBO.init();
+
+    animate();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        Demo.UBO.render();
+    }
+
+</script>
+
+
+</body>
+</html>
