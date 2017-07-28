@@ -582,7 +582,11 @@ namespace Demo {
             return dest;
         };
 
-        static lookAt(eye: number[], center: number[], up: number[], dest: number[]) {
+        static lookAt(eye: number[], center?: number[], up?: number[], dest?: number[]) {
+            center = center || [0,0,0];
+            up = up || [0,1,0];
+            dest = dest|| [];
+
             var eyex = eye[0], eyey = eye[1], eyez = eye[2], upx = up[0], upy = up[1], upz = up[2], centerx = center[0],
                 centery = center[1], centerz = center[2];
 
