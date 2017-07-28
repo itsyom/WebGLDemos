@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        body {
+            margin: 0px;
+            background-color: #000000;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id = "render-canvas"></canvas>
+
+
+<script type="text/javascript" src="../lib/gl-matrix.js"></script>
+<script type="text/javascript" src="../lib/utils.js"></script>
+<script type="text/javascript" src="../bin/bundle.min.js"></script>
+
+<script type="text/javascript">
+
+    var canvas = document.getElementById("render-canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var gl = canvas.getContext("webgl2",{
+        antialias:true
+    });
+
+    Demo.Deferred.gl = gl;
+
+    Demo.Deferred.init();
+
+    function animate(){
+        requestAnimationFrame(animate);
+
+        Demo.Deferred.render();
+    }
+
+    animate();
+
+
+</script>
+
+</body>
+</html>

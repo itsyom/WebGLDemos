@@ -85,8 +85,8 @@ namespace Demo.Triangle{
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,vbo2);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);
 
-        any(gl).bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER,null);
+        any(gl).bindVertexArray(null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
 
     }

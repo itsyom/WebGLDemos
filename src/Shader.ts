@@ -17,7 +17,7 @@ namespace Demo{
             let succ = gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS);
             if(!succ){
                 let log = gl.getShaderInfoLog(vertexShader);
-                console.log("compile shader error:",log);
+                console.log("compile shader error:",log,v);
                 return ;
             }
 
@@ -28,7 +28,7 @@ namespace Demo{
             succ = gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS);
             if(!succ){
                 let log = gl.getShaderInfoLog(fragmentShader);
-                console.log(log);
+                console.log("compile shader error:",log,f);
                 return;
             }
 
